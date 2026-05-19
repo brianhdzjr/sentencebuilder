@@ -1,0 +1,15 @@
+{
+  "name": "AAC Grid Application",
+  "short_name": "GridTalk",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#f4f4f9",
+  "theme_color": "#007aff",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

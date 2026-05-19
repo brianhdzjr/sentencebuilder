@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="GridTalk">
+    
+    <link rel="manifest" href="manifest.json">
+    <title>AAC Sentence Builder</title>
+
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overscroll-behavior-y: none; 
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* Top Bar Container for Output and Controls */
+        #top-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        #output-bar {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            font-size: 26px;
+            font-weight: bold;
+            min-height: 75px;
+            flex-grow: 1;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            overflow-x: auto;
+            white-space: nowrap;
+            border: 2px solid #e0e0e0;
+        }
+
+        /* Action/Control Buttons (Speak, Clear, Backspace) */
+        .control-panel {
+            display: flex;
+            gap: 10px;
+        }
+        .control-btn {
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            padding: 0 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            min-width: 90px;
+        }
+        .control-btn span { font-size: 24px; margin-bottom: 4px; }
+        .btn-speak { background-color: #34c759; } /* Green */
+        .btn-clear { background-color: #ff3b30; } /* Red */
+        .btn-back { background-color: #ff9500; }  /* Orange */
+
+        .control-btn:active, .btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Vocabulary Grid */
+        #grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 15px;
+            flex-grow: 1;
+        }
+        .btn {
+            background-color: #007aff;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn span { font-size: 42px; margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+
+    <!-- Top Section: Sentence display bar and control buttons -->
+    <div id="top-container">
+        <div id="output-bar" id="sentence-display">Tap words to build a sentence...</div>
+        
+        <div class="control-panel">
+            <button class="control-btn btn-speak" id="action-speak"><span>🔊</span>Speak</button>
+            <button class="control-btn btn-back" id="action-back"><span>⌫</span>Back</button>
+            <button class="control-btn btn-clear" id="action-clear"><span>🗑️</span>Clear</button>
+        </div>
+    </div>
+
+    <!-- Main Vocabulary Grid -->
+    <div id="grid"></div>
+
+    <script>
+        // Internal state tracking the current sentence words
+        let currentSentence = [];
+
+        const vocabulary = [
+            { text: "I want", icon: "🤲" },
+            { text: "More", icon: "➕" },
+            { text: "Eat", icon: "🍎" },
+            { text: "Drink", icon: "🧃" },
+            { text: "Help", icon: "🆘" },
+            { text: "Please", icon: "🙏" },
+            { text: "Yes", icon: "✅" },
+            { text: "No", icon: "❌" },
+            { text: "Go", icon: "🚗" },
+            { text: "Stop", icon: "🛑" },
+            { text: "Happy", icon: "😊" },
+            { text: "Sad", icon: "😢" }
+        ];
+
+        const grid = document.getElementById('grid');
+        const outputBar = document.getElementById('output-bar');
+
+        // Core speech engine function
+        function speak(text) {
+            if (!text) return;
+            window.speechSynthesis.cancel(); // Stop any lingering audio
+            const utterance = new SpeechSynthesisUtterance(text);
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Update the visual text bar based on the state array
+        function updateDisplay() {
+            if (currentSentence.length === 0) {
+                outputBar.textContent = "Tap words to build a sentence...";
+                outputBar.style.color = "#8e8e93"; // Muted gray text when empty
+            } else {
+                outputBar.textContent = currentSentence.join(" ");
+                outputBar.style.color = "#000000";
+            }
+            // Auto-scroll the display bar to the right if it overflows
+            outputBar.scrollLeft = outputBar.scrollWidth;
+        }
+
+        // --- Event Listeners for Controls ---
+
+        // Speak Full Sentence
+        document.getElementById('action-speak').addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            if (currentSentence.length > 0) {
+                speak(currentSentence.join(" "));
+            }
+        });
+
+        // Backspace (Remove last word)
+        document.getElementById('action-back').addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            currentSentence.pop();
+            updateDisplay();
+        });
+
+        // Clear Entire Bar
+        document.getElementById('action-clear').addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            currentSentence = [];
+            updateDisplay();
+        });
+
+        // --- Generate Grid Buttons Dynamically ---
+        vocabulary.forEach(item => {
+            const btn = document.createElement('button');
+            btn.className = 'btn';
+            btn.innerHTML = `<span>${item.icon}</span>${item.text}`;
+            
+            btn.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                
+                // 1. Add word to our sentence array
+                currentSentence.push(item.text);
+                updateDisplay();
+                
+                // 2. Pronounce the individual word immediately (Standard AAC feedback)
+                speak(item.text);
+            });
+            grid.appendChild(btn);
+        });
+
+        // Service Worker setup for offline caching
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('Service Worker Registered!'))
+                    .catch(err => console.error('Service Worker Failed!', err));
+            });
+        }
+    </script>
+</body>
+</html>
