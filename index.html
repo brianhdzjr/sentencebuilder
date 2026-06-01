@@ -6,7 +6,7 @@
   <title>GridTalk AAC</title>
   
   <style>
-    /* Reset and Core Layout Engine matching image_51933b.png */
+    /* Reset and Core Layout Engine */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -93,7 +93,7 @@
       align-items: center;
       justify-content: space-between;
       cursor: pointer;
-      aspect-ratio: 1 / 1; /* Retains crisp squares */
+      aspect-ratio: 1 / 1; 
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
       transition: transform 0.1s ease, border-color 0.1s ease;
       touch-action: manipulation;
@@ -105,7 +105,6 @@
       border-color: #3b82f6;
     }
 
-    /* FLUID WRAPPER FOR SVG AND GALLERY GRAPHICS */
     .tile-icon-container {
       width: 70%;
       height: 70%;
@@ -139,6 +138,7 @@
       padding: 24px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.04);
       border: 1px solid #e2e8f0;
+      margin-bottom: 20px;
     }
 
     .management-panel h3 {
@@ -176,7 +176,6 @@
       background-color: #fff;
     }
 
-    /* File Input Styling Enhancements for iPad Safari click targets */
     .input-field input[type="file"] {
       padding: 8px;
       cursor: pointer;
@@ -186,11 +185,28 @@
       border-color: #3b82f6;
     }
 
+    .button-group {
+      display: flex;
+      gap: 12px;
+    }
+
     .add-tile-btn {
       background: #10b981;
       color: white;
       border: none;
       padding: 14px 28px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 1rem;
+      height: 48px;
+    }
+
+    .reset-btn {
+      background: #94a3b8;
+      color: white;
+      border: none;
+      padding: 14px 20px;
       border-radius: 8px;
       font-weight: 600;
       cursor: pointer;
@@ -208,18 +224,14 @@
 
   <h1>GridTalk AAC</h1>
 
-  <!-- Sentence Display Deck -->
   <div class="sentence-container" id="sentence-bar">
     <div style="color: #94a3b8;" id="placeholder-text">Tap tiles below to build a sentence...</div>
     <button class="clear-btn" id="clear-sentence" style="display: none;">Clear</button>
   </div>
 
-  <!-- Main Grid Workspace -->
   <div class="aac-grid" id="main-board">
-    <!-- Managed entries print here -->
-  </div>
+    </div>
 
-  <!-- Custom Configuration Panel -->
   <div class="management-panel">
     <h3>Add Custom Vocabulary Card</h3>
     <div class="form-group">
@@ -237,7 +249,6 @@
         </select>
       </div>
 
-      <!-- DYNAMIC VALUE SLOTS (Swaps between file input and raw vector code text fields) -->
       <div class="input-field" id="field-wrapper">
         <label id="dynamic-field-label" for="icon-file">Select Image</label>
         <input type="file" id="icon-file" accept="image/*">
@@ -248,13 +259,16 @@
         <input type="text" id="audio-source" placeholder="Defaults to system speech engine">
       </div>
 
-      <button class="add-tile-btn" onclick="addNewVocabularyCard()">Add To Grid</button>
+      <div class="button-group">
+        <button class="add-tile-btn" onclick="addNewVocabularyCard()">Add To Grid</button>
+        <button class="reset-btn" onclick="resetGridToDefault()" title="Wipe custom cards and reset layout">Reset Grid</button>
+      </div>
     </div>
   </div>
 
   <script>
-    // EXPANDED CORE AAC DICTIONARY ARRAY (Preloaded with geometric SVGs matching your interface profile)
-    let vocabularyData = [
+    // 1. HARDCODED SYSTEM DEFAULTS
+    const DEFAULT_VOCABULARY = [
       {
         label: "I Want",
         iconType: "svg",
@@ -305,15 +319,16 @@
       }
     ];
 
+    // 2. SAVING ENGINE CHECK: Looks for existing hardware-saved data first, falls back to defaults if empty
+    let vocabularyData = JSON.parse(localStorage.getItem('gridtalk_vocabulary_db')) || DEFAULT_VOCABULARY;
+
     let sentenceArray = [];
     let iPadAudioPool = null;
 
-    // Board Generation Engine
     function renderAacBoard() {
       const board = document.getElementById('main-board');
       
       board.innerHTML = vocabularyData.map((tile, index) => {
-        // Correctly isolates file storage formats from SVG structures
         const interiorIcon = (tile.iconType === 'svg') 
           ? tile.iconValue 
           : `<img src="${tile.iconValue}" alt="${tile.label}">`;
@@ -329,7 +344,6 @@
       }).join('');
     }
 
-    // Input layout shifting engine
     function toggleInputOptions() {
       const selectedMethod = document.getElementById('icon-type').value;
       const wrapper = document.getElementById('field-wrapper');
@@ -347,7 +361,6 @@
       }
     }
 
-    // Process local gallery asset reads or vector code insertions
     function addNewVocabularyCard() {
       const labelInput = document.getElementById('word-label').value.trim();
       const typeMethod = document.getElementById('icon-type').value;
@@ -365,7 +378,6 @@
         pushAndRefreshGrid(labelInput, 'svg', svgCode, audioInput);
         resetFormInputs();
       } else {
-        // GALLERY FILE PROCESSING ENGINE
         const fileSelector = document.getElementById('icon-file');
         if (fileSelector.files.length === 0) {
           alert("Please pick an image file from your media gallery!");
@@ -375,7 +387,6 @@
         const chosenFile = fileSelector.files[0];
         const readerInstance = new FileReader();
 
-        // Enforces asynchronous extraction of binary to stable base64 local streams
         readerInstance.onload = function(event) {
           const processedBase64Image = event.target.result;
           pushAndRefreshGrid(labelInput, 'gallery', processedBase64Image, audioInput);
@@ -386,6 +397,7 @@
       }
     }
 
+    // 3. PERSISTENCE LAYER WRITE: Commits data array changes into iPad LocalStorage
     function pushAndRefreshGrid(label, type, value, audio) {
       vocabularyData.push({
         label: label,
@@ -393,16 +405,27 @@
         iconValue: value,
         audio: audio
       });
+      
+      // Saves the array database as a string into iPad system memory
+      localStorage.setItem('gridtalk_vocabulary_db', JSON.stringify(vocabularyData));
       renderAacBoard();
+    }
+
+    // Option to wipe custom entries if needed
+    function resetGridToDefault() {
+      if(confirm("Are you sure you want to delete your custom cards and reset to default?")) {
+        localStorage.removeItem('gridtalk_vocabulary_db');
+        vocabularyData = [...DEFAULT_VOCABULARY];
+        renderAacBoard();
+      }
     }
 
     function resetFormInputs() {
       document.getElementById('word-label').value = '';
       document.getElementById('audio-source').value = '';
-      toggleInputOptions(); // Clean resets the target selection layer back to file mode
+      toggleInputOptions();
     }
 
-    // Execution Audio Handlers & Text-To-Speech Fallback Core
     function handleTileActivation(index) {
       const selectedItem = vocabularyData[index];
       
@@ -421,7 +444,6 @@
       }
     }
 
-    // Upper construction display interface updates
     function updateSentenceBarDisplay() {
       const bar = document.getElementById('sentence-bar');
       const placeholder = document.getElementById('placeholder-text');
