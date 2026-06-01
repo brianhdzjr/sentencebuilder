@@ -2,11 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <!-- CRITICAL FOR IPAD: Fixes mobile canvas resolution and stops microscopic auto-scaling -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Sentence Builder AAC</title>
+  <title>AAC Grid App</title>
   
   <style>
-    /* Reset and Core Layout */
+    /* Reset and Base Canvas to match image_51a2b9.png */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -15,72 +16,75 @@
     
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: #f5f7fb;
-      padding: 20px;
+      background-color: #f4f6fa;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 40px 20px;
     }
 
-    /* Fluid Grid Container */
+    /* Grid layout holding the responsive cards */
     .aac-grid {
       display: grid;
-      /* Automatically fits columns based on screen width, min size 140px */
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 16px;
-      max-width: 1200px;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      width: 100%;
+      max-width: 1000px;
       margin: 0 auto;
     }
 
-    /* Accessible Touch Target Tiles */
+    /* Exact Card Style matching image_51a2b9.png */
     .aac-tile {
       background-color: #ffffff;
-      border: 3px solid #e2e8f0;
+      border: 1px solid #e5e9f0;
       border-radius: 16px;
-      padding: 16px;
+      padding: 32px 24px 20px 24px; /* Added spacing to cushion the layout */
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: space-between;
       cursor: pointer;
-      /* Keeps tiles perfectly square regardless of column width */
-      aspect-ratio: 1 / 1; 
-      transition: transform 0.1s ease, border-color 0.2s ease;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      aspect-ratio: 1 / 1; /* Guarantees tiles stay perfectly square on iPad */
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.02), 0 8px 16px -6px rgba(0, 0, 0, 0.02);
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
       
-      /* Webkit optimizes touch delays on iPad */
+      /* Optimizes touch interactions for iOS Safari */
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* Tactile response feedback on tap */
+    /* Tactile response when tapped on iPad */
     .aac-tile:active {
-      transform: scale(0.96);
-      border-color: #3b82f6;
-      background-color: #eff6ff;
+      transform: scale(0.97);
+      background-color: #fcfdfe;
     }
 
-    /* FLUID ICON FIX: Icons scale smoothly based on tile size */
-    .aac-icon-wrapper {
-      width: 60%;
-      height: 60%;
+    /* FIX 1: Fluid Icon Container (Maintains high-vis dimensions across different formats) */
+    .tile-icon-container {
+      width: 70%;  /* Controls how large the icon sits inside the square */
+      height: 70%;
       display: flex;
       align-items: center;
       justify-content: center;
+      margin-bottom: auto; /* Pushes text cleanly to the absolute bottom margin */
     }
 
-    .aac-icon-wrapper img,
-    .aac-icon-wrapper svg {
+    /* Forces SVGs, Local PNGs, or URL Images to scale identically inside the wrapper */
+    .tile-icon-container img,
+    .tile-icon-container svg {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: contain; /* Prevents stretching or clipping distortion */
     }
 
-    /* Legible Label Typography */
+    /* Exact Text Label Typography from your design */
     .aac-label {
-      margin-top: 8px;
       font-size: 1.1rem;
-      font-weight: 600;
-      color: #1e293b;
+      font-weight: 500;
+      color: #2d3748;
       text-align: center;
-      word-break: break-word;
+      margin-top: 16px;
     }
   </style>
 </head>
@@ -88,18 +92,30 @@
 
   <div class="aac-grid">
     
-    <div class="aac-tile" data-sound="https://actions.google.com/sounds/v1/cartoon/slide_whistle_to_drum_hit.ogg">
-      <div class="aac-icon-wrapper">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#3b82f6">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M10.05 4.575a1.5 1.5 0 0 0-1.93 1.93l1.757 5.273-5.273-1.757a1.5 1.5 0 0 0-1.93 1.93l5.273 1.757-1.757 5.273a1.5 1.5 0 0 0 1.93 1.93l5.273-1.757 1.757 5.273a1.5 1.5 0 0 0 1.93-1.93l-1.757-5.273 5.273 1.757a1.5 1.5 0 0 0 1.93-1.93l-5.273-1.757 1.757-5.273a1.5 1.5 0 0 0-1.93-1.93l-5.273 1.757 1.757-5.273Z" />
+    <!-- TILE 1: ACTION -->
+    <div class="aac-tile" data-audio="audio/action.mp3">
+      <div class="tile-icon-container">
+        <!-- ICON OPTION A: Inline SVG matching your blue action symbol -->
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="#2563eb">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 21l8.982-11.795H14.18l.818-5.205L6 15.904h3.813Z" />
         </svg>
+        
+        <!-- ICON OPTION B (Local File Placeholder): 
+        <img src="assets/action.png" alt="Action"> 
+        -->
+        
+        <!-- ICON OPTION C (Web URL Placeholder): 
+        <img src="https://example.com/action-icon.png" alt="Action"> 
+        -->
       </div>
       <div class="aac-label">Action</div>
     </div>
 
-    <div class="aac-tile" data-sound="https://actions.google.com/sounds/v1/actions/snare_roll.ogg">
-      <div class="aac-icon-wrapper">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#10b981">
+    <!-- TILE 2: PERSON -->
+    <div class="aac-tile" data-audio="audio/person.mp3">
+      <div class="tile-icon-container">
+        <!-- ICON OPTION A: Inline SVG matching your green person symbol -->
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="#10b981">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
         </svg>
       </div>
@@ -109,45 +125,47 @@
   </div>
 
   <script>
-    // IPAD AUDIO FIX: Maintain a single cached Audio Context or Audio Instance globally
-    let audioPlaybackEngine = null;
+    // FIX 2: Global single-instance Audio pool to handle iOS Safari restrictions
+    let iPadAudioPool = null;
 
-    function playAACSound(soundUrl) {
-      if (!soundUrl) return;
+    function playAACSound(audioUrl) {
+      if (!audioUrl) return;
 
-      // Lazy initialize the audio player object on the very first tap gesture
-      if (!audioPlaybackEngine) {
-        audioPlaybackEngine = new Audio();
+      // Lazy-instantiate the Audio element strictly inside the user execution thread
+      if (!iPadAudioPool) {
+        iPadAudioPool = new Audio();
       }
 
-      // Explicitly change the source context synchronously
-      audioPlaybackEngine.src = soundUrl;
-      
-      // iOS requires the .load() configuration to clear out old state strings
-      audioPlaybackEngine.load();
-
-      // Execute execution inside a synchronous promise handle
-      const playPromise = audioPlaybackEngine.play();
-
-      if (playPromise !== undefined) {
-        playPromise.catch(error => {
-          console.error("Audio playback muted or prevented by iOS safety context:", error);
-          alert("Please verify your iPad is not toggled to Hardware Silent/Mute mode via Control Center.");
-        });
+      try {
+        // Synchronously bind the file target before the browser security window expires
+        iPadAudioPool.src = audioUrl;
+        
+        // Clear old browser audio memory traces
+        iPadAudioPool.load(); 
+        
+        const playPromise = iPadAudioPool.play();
+        
+        if (playPromise !== undefined) {
+          playPromise.catch(error => {
+            console.error("Audio block encountered on iPad:", error);
+            // Reminder: Make sure the iPad hardware mute switch on the side/Control Center isn't enabled!
+          });
+        }
+      } catch (e) {
+        console.error("Audio engine failed to load resource:", e);
       }
     }
 
-    // Attach interaction events cleanly using event delegation
+    // Modern event delegation loop targeting touch coordinates cleanly
     document.addEventListener('DOMContentLoaded', () => {
-      const gridContainer = document.querySelector('.aac-grid');
+      const mainGrid = document.querySelector('.aac-grid');
 
-      // 'pointerdown' or 'click' handles events immediately along the main user action timeline
-      gridContainer.addEventListener('click', (event) => {
-        const targetedTile = event.target.closest('.aac-tile');
+      mainGrid.addEventListener('click', (event) => {
+        const clickedCard = event.target.closest('.aac-tile');
         
-        if (targetedTile) {
-          const audioUrl = targetedTile.getAttribute('data-sound');
-          playAACSound(audioUrl);
+        if (clickedCard) {
+          const soundFilePath = clickedCard.getAttribute('data-audio');
+          playAACSound(soundFilePath);
         }
       });
     });
