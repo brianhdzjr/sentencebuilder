@@ -2,12 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <!-- IPAD CANVAS FIX: Prevents mobile Safari from scaling your tools down to a microscopic size -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>GridTalk AAC</title>
   
   <style>
-    /* Global Styling Setup */
+    /* Reset and Core Layout Engine matching image_51933b.png */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -26,12 +25,13 @@
     }
 
     h1 {
-      margin-bottom: 20px;
+      margin: 10px 0 20px 0;
       font-size: 1.8rem;
       color: #1a202c;
+      text-align: center;
     }
 
-    /* 1. THE SENTENCE BUILDER DISPLAY BAR */
+    /* THE SENTENCE DISPLAY BAR */
     .sentence-container {
       width: 100%;
       max-width: 1100px;
@@ -57,7 +57,8 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      animation: popIn 0.2s ease;
+      animation: popIn 0.15s ease;
+      white-space: nowrap;
     }
 
     .clear-btn {
@@ -71,29 +72,29 @@
       cursor: pointer;
     }
 
-    /* 2. THE CORE VOCABULARY GRID */
+    /* THE AAC GRID BOARD */
     .aac-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
       gap: 20px;
       width: 100%;
       max-width: 1100px;
       margin-bottom: 40px;
     }
 
-    /* IPAD CARD DESIGN */
+    /* IPAD TARGET TILE SPECIFICATIONS */
     .aac-tile {
       background-color: #ffffff;
       border: 2px solid #e2e8f0;
       border-radius: 16px;
-      padding: 16px;
+      padding: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: space-between;
       cursor: pointer;
-      aspect-ratio: 1 / 1; /* Keeps tiles perfectly square on tablet grids */
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+      aspect-ratio: 1 / 1; /* Retains crisp squares */
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
       transition: transform 0.1s ease, border-color 0.1s ease;
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
@@ -104,10 +105,10 @@
       border-color: #3b82f6;
     }
 
-    /* REUSEABLE ICON WRAPPER: Automatically resizes ANY picture option seamlessly */
+    /* FLUID WRAPPER FOR SVG AND GALLERY GRAPHICS */
     .tile-icon-container {
-      width: 65%;
-      height: 65%;
+      width: 70%;
+      height: 70%;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -118,30 +119,31 @@
     .tile-icon-container svg {
       width: 100%;
       height: 100%;
-      object-fit: contain; /* Prevents user-uploaded images from stretching or squeezing */
+      object-fit: contain;
     }
 
     .aac-label {
-      font-size: 1.05rem;
+      font-size: 1.1rem;
       font-weight: 600;
       color: #334155;
       text-align: center;
-      margin-top: 8px;
+      margin-top: 10px;
     }
 
-    /* 3. MANAGEMENT PANEL: ADD CUSTOM WORDS & IMAGES */
+    /* ADD PANEL CONTAINER */
     .management-panel {
       width: 100%;
       max-width: 1100px;
       background: #ffffff;
       border-radius: 16px;
       padding: 24px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
       border: 1px solid #e2e8f0;
     }
 
     .management-panel h3 {
       margin-bottom: 16px;
+      font-size: 1.2rem;
     }
 
     .form-group {
@@ -153,7 +155,7 @@
 
     .input-field {
       flex: 1;
-      min-width: 200px;
+      min-width: 220px;
       display: flex;
       flex-direction: column;
       gap: 6px;
@@ -166,14 +168,21 @@
     }
 
     .input-field input, .input-field select {
-      padding: 10px;
+      padding: 12px;
       border: 2px solid #e2e8f0;
       border-radius: 8px;
       font-size: 1rem;
       outline: none;
+      background-color: #fff;
     }
 
-    .input-field input:focus {
+    /* File Input Styling Enhancements for iPad Safari click targets */
+    .input-field input[type="file"] {
+      padding: 8px;
+      cursor: pointer;
+    }
+
+    .input-field input:focus, .input-field select:focus {
       border-color: #3b82f6;
     }
 
@@ -181,11 +190,12 @@
       background: #10b981;
       color: white;
       border: none;
-      padding: 12px 24px;
+      padding: 14px 28px;
       border-radius: 8px;
       font-weight: 600;
       cursor: pointer;
       font-size: 1rem;
+      height: 48px;
     }
 
     @keyframes popIn {
@@ -198,43 +208,44 @@
 
   <h1>GridTalk AAC</h1>
 
-  <!-- Sentence Assembly Bar -->
+  <!-- Sentence Display Deck -->
   <div class="sentence-container" id="sentence-bar">
     <div style="color: #94a3b8;" id="placeholder-text">Tap tiles below to build a sentence...</div>
-    <!-- Words will inject dynamically here -->
     <button class="clear-btn" id="clear-sentence" style="display: none;">Clear</button>
   </div>
 
-  <!-- Main Grid Board -->
+  <!-- Main Grid Workspace -->
   <div class="aac-grid" id="main-board">
-    <!-- Grid items loaded dynamically by JavaScript -->
+    <!-- Managed entries print here -->
   </div>
 
-  <!-- Creator Form Layout to Add Your Personal Pictures & Words -->
+  <!-- Custom Configuration Panel -->
   <div class="management-panel">
     <h3>Add Custom Vocabulary Card</h3>
     <div class="form-group">
+      
       <div class="input-field">
         <label for="word-label">Word/Label</label>
         <input type="text" id="word-label" placeholder="e.g., More">
       </div>
       
       <div class="input-field">
-        <label for="icon-type">Icon Type</label>
-        <select id="icon-type" onchange="toggleIconInput()">
-          <option value="url">Image Web URL / Local Path</option>
-          <option value="svg">Inline SVG Code</option>
+        <label for="icon-type">Icon Method</label>
+        <select id="icon-type" onchange="toggleInputOptions()">
+          <option value="gallery">Upload from Device Gallery / Camera</option>
+          <option value="svg">Paste Inline SVG Source String</option>
         </select>
       </div>
 
-      <div class="input-field" id="icon-value-container">
-        <label id="icon-label-text" for="icon-value">Image Source Link</label>
-        <input type="text" id="icon-value" placeholder="https://example.com/picture.png">
+      <!-- DYNAMIC VALUE SLOTS (Swaps between file input and raw vector code text fields) -->
+      <div class="input-field" id="field-wrapper">
+        <label id="dynamic-field-label" for="icon-file">Select Image</label>
+        <input type="file" id="icon-file" accept="image/*">
       </div>
 
       <div class="input-field">
-        <label for="audio-source">Speech Audio URL (Optional)</label>
-        <input type="text" id="audio-source" placeholder="Leave blank for auto text-to-speech">
+        <label for="audio-source">Audio Speech URL (Optional)</label>
+        <input type="text" id="audio-source" placeholder="Defaults to system speech engine">
       </div>
 
       <button class="add-tile-btn" onclick="addNewVocabularyCard()">Add To Grid</button>
@@ -242,40 +253,68 @@
   </div>
 
   <script>
-    // CORE DICTIONARY DATASET (Your database layout)
+    // EXPANDED CORE AAC DICTIONARY ARRAY (Preloaded with geometric SVGs matching your interface profile)
     let vocabularyData = [
       {
         label: "I Want",
         iconType: "svg",
-        iconValue: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#2563eb"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" /></svg>`,
+        iconValue: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="#2563eb"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" /></svg>`,
         audio: "" 
       },
       {
         label: "Help",
         iconType: "svg",
-        iconValue: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#10b981"><path stroke-linecap="round" stroke-linejoin="round" d="M10.05 4.575a1.5 1.5 0 0 0-1.93 1.93l1.757 5.273-5.273-1.757a1.5 1.5 0 0 0-1.93 1.93l5.273 1.757-1.757 5.273a1.5 1.5 0 0 0 1.93 1.93l5.273-1.757 1.757 5.273a1.5 1.5 0 0 0 1.93-1.93l-1.757-5.273 5.273 1.757a1.5 1.5 0 0 0 1.93-1.93l-5.273-1.757 1.757-5.273a1.5 1.5 0 0 0-1.93-1.93l-5.273 1.757 1.757-5.273Z" /></svg>`,
+        iconValue: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="#10b981"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>`,
         audio: ""
       },
       {
         label: "Eat",
-        iconType: "url",
-        iconValue: "https://cdn-icons-png.flaticon.com/512/3081/3081921.png", // Web picture example
+        iconType: "svg",
+        iconValue: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="#111827"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" /></svg>`,
+        audio: ""
+      },
+      {
+        label: "More",
+        iconType: "svg",
+        iconValue: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="#f59e0b"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>`,
+        audio: ""
+      },
+      {
+        label: "Stop",
+        iconType: "svg",
+        iconValue: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="#ef4444"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`,
+        audio: ""
+      },
+      {
+        label: "Go",
+        iconType: "svg",
+        iconValue: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="#10b981"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`,
+        audio: ""
+      },
+      {
+        label: "Yes",
+        iconType: "svg",
+        iconValue: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="#059669"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>`,
+        audio: ""
+      },
+      {
+        label: "No",
+        iconType: "svg",
+        iconValue: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="#dc2626"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>`,
         audio: ""
       }
     ];
 
     let sentenceArray = [];
-    
-    // IPAD AUDIO RESTRICTION RESOLUTION: Maintain a cached audio pool 
     let iPadAudioPool = null;
 
-    // Render loop processing the whole grid array dynamically
+    // Board Generation Engine
     function renderAacBoard() {
       const board = document.getElementById('main-board');
       
       board.innerHTML = vocabularyData.map((tile, index) => {
-        // Evaluate icon injection method straight out of the JSON properties
-        const interiorIcon = tile.iconType === 'svg' 
+        // Correctly isolates file storage formats from SVG structures
+        const interiorIcon = (tile.iconType === 'svg') 
           ? tile.iconValue 
           : `<img src="${tile.iconValue}" alt="${tile.label}">`;
 
@@ -290,38 +329,106 @@
       }).join('');
     }
 
-    // Handles speaking and moving choices into the sentence track
-    function handleTileActivation(index) {
-      const selectedItem = vocabularyData[index];
+    // Input layout shifting engine
+    function toggleInputOptions() {
+      const selectedMethod = document.getElementById('icon-type').value;
+      const wrapper = document.getElementById('field-wrapper');
       
-      // Update sentence tracker logic
-      sentenceArray.push(selectedItem);
-      updateSentenceBarDisplay();
-
-      // EXECUTE CONTEXT SPEECH SYNCED ON TOUCH TIME
-      if (selectedItem.audio) {
-        // If an explicit MP3 route exists, route it via single audio node
-        if (!iPadAudioPool) iPadAudioPool = new Audio();
-        iPadAudioPool.src = selectedItem.audio;
-        iPadAudioPool.load();
-        iPadAudioPool.play().catch(e => console.log("Audio node block:", e));
+      if (selectedMethod === 'svg') {
+        wrapper.innerHTML = `
+          <label id="dynamic-field-label" for="icon-code">Paste SVG Code String</label>
+          <input type="text" id="icon-code" placeholder="<svg>...</svg>">
+        `;
       } else {
-        // Default Fallback: iOS Text To Speech Engine
-        const speechUtterance = new SpeechSynthesisUtterance(selectedItem.label);
-        speechUtterance.rate = 0.9;
-        window.speechSynthesis.speak(speechUtterance);
+        wrapper.innerHTML = `
+          <label id="dynamic-field-label" for="icon-file">Select Image</label>
+          <input type="file" id="icon-file" accept="image/*">
+        `;
       }
     }
 
-    // Sentence Box updates
+    // Process local gallery asset reads or vector code insertions
+    function addNewVocabularyCard() {
+      const labelInput = document.getElementById('word-label').value.trim();
+      const typeMethod = document.getElementById('icon-type').value;
+      const audioInput = document.getElementById('audio-source').value.trim();
+
+      if (!labelInput) {
+        alert("Please assign a Word/Label name!");
+        return;
+      }
+
+      if (typeMethod === 'svg') {
+        const svgCode = document.getElementById('icon-code').value.trim();
+        if (!svgCode) return alert("Please enter valid SVG markup elements.");
+        
+        pushAndRefreshGrid(labelInput, 'svg', svgCode, audioInput);
+        resetFormInputs();
+      } else {
+        // GALLERY FILE PROCESSING ENGINE
+        const fileSelector = document.getElementById('icon-file');
+        if (fileSelector.files.length === 0) {
+          alert("Please pick an image file from your media gallery!");
+          return;
+        }
+
+        const chosenFile = fileSelector.files[0];
+        const readerInstance = new FileReader();
+
+        // Enforces asynchronous extraction of binary to stable base64 local streams
+        readerInstance.onload = function(event) {
+          const processedBase64Image = event.target.result;
+          pushAndRefreshGrid(labelInput, 'gallery', processedBase64Image, audioInput);
+          resetFormInputs();
+        };
+
+        readerInstance.readAsDataURL(chosenFile);
+      }
+    }
+
+    function pushAndRefreshGrid(label, type, value, audio) {
+      vocabularyData.push({
+        label: label,
+        iconType: type,
+        iconValue: value,
+        audio: audio
+      });
+      renderAacBoard();
+    }
+
+    function resetFormInputs() {
+      document.getElementById('word-label').value = '';
+      document.getElementById('audio-source').value = '';
+      toggleInputOptions(); // Clean resets the target selection layer back to file mode
+    }
+
+    // Execution Audio Handlers & Text-To-Speech Fallback Core
+    function handleTileActivation(index) {
+      const selectedItem = vocabularyData[index];
+      
+      sentenceArray.push(selectedItem);
+      updateSentenceBarDisplay();
+
+      if (selectedItem.audio) {
+        if (!iPadAudioPool) iPadAudioPool = new Audio();
+        iPadAudioPool.src = selectedItem.audio;
+        iPadAudioPool.load();
+        iPadAudioPool.play().catch(e => console.log("Audio pipeline block:", e));
+      } else {
+        const vocalResponse = new SpeechSynthesisUtterance(selectedItem.label);
+        vocalResponse.rate = 0.9;
+        window.speechSynthesis.speak(vocalResponse);
+      }
+    }
+
+    // Upper construction display interface updates
     function updateSentenceBarDisplay() {
       const bar = document.getElementById('sentence-bar');
       const placeholder = document.getElementById('placeholder-text');
       const clearBtn = document.getElementById('clear-sentence');
       
-      // Clear out previous render trace elements safely
-      const existingWords = bar.querySelectorAll('.sentence-word');
-      existingWords.forEach(el => el.remove());
+      const targetRemovals = bar.querySelectorAll('.sentence-word');
+      targetRemovals.forEach(el => el.remove());
 
       if (sentenceArray.length === 0) {
         placeholder.style.display = "block";
@@ -332,68 +439,24 @@
       placeholder.style.display = "none";
       clearBtn.style.display = "block";
 
-      // Append terms sequentially up onto the construction workspace
       sentenceArray.forEach(item => {
-        const wordBadge = document.createElement('div');
-        wordBadge.className = 'sentence-word';
+        const badge = document.createElement('div');
+        badge.className = 'sentence-word';
         
-        const miniIcon = item.iconType === 'svg' ? item.iconValue : `<img src="${item.iconValue}" style="width:20px;height:20px;object-fit:contain;">`;
-        wordBadge.innerHTML = `${miniIcon} <span>${item.label}</span>`;
-        
-        bar.insertBefore(wordBadge, clearBtn);
+        const miniRendering = item.iconType === 'svg' 
+          ? item.iconValue 
+          : `<img src="${item.iconValue}" style="width:22px;height:22px;object-fit:contain;">`;
+          
+        badge.innerHTML = `${miniRendering} <span>${item.label}</span>`;
+        bar.insertBefore(badge, clearBtn);
       });
     }
 
-    // Clear Sentence Action
     document.getElementById('clear-sentence').addEventListener('click', () => {
       sentenceArray = [];
       updateSentenceBarDisplay();
     });
 
-    // ENGINE FOR ADDING PICTURES AND CUSTOM WORDS ON THE FLY
-    function addNewVocabularyCard() {
-      const labelInput = document.getElementById('word-label').value.trim();
-      const typeInput = document.getElementById('icon-type').value;
-      const valueInput = document.getElementById('icon-value').value.trim();
-      const audioInput = document.getElementById('audio-source').value.trim();
-
-      if (!labelInput || !valueInput) {
-        alert("Please provide both a Word Label and an Image source link!");
-        return;
-      }
-
-      // Add custom array node directly to runtime memory layout 
-      vocabularyData.push({
-        label: labelInput,
-        iconType: typeInput,
-        iconValue: valueInput,
-        audio: audioInput
-      });
-
-      // Refresh layout render trace
-      renderAacBoard();
-
-      // Reset form variables
-      document.getElementById('word-label').value = '';
-      document.getElementById('icon-value').value = '';
-      document.getElementById('audio-source').value = '';
-    }
-
-    function toggleIconInput() {
-      const type = document.getElementById('icon-type').value;
-      const label = document.getElementById('icon-label-text');
-      const input = document.getElementById('icon-value');
-
-      if (type === 'svg') {
-        label.innerText = "Paste SVG Code Code String";
-        input.placeholder = "<svg>...</svg>";
-      } else {
-        label.innerText = "Image Source Link";
-        input.placeholder = "https://example.com/picture.png";
-      }
-    }
-
-    // Boot execution loop on startup
     document.addEventListener('DOMContentLoaded', () => {
       renderAacBoard();
     });
