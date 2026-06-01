@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <!-- CRITICAL FOR IPAD: Fixes mobile canvas resolution and stops microscopic auto-scaling -->
+  <!-- IPAD CANVAS FIX: Prevents mobile Safari from scaling your tools down to a microscopic size -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>AAC Grid App</title>
+  <title>GridTalk AAC</title>
   
   <style>
-    /* Reset and Base Canvas to match image_51a2b9.png */
+    /* Global Styling Setup */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -15,159 +15,387 @@
     }
     
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background-color: #f4f6fa;
+      color: #2d3748;
+      padding: 20px;
       display: flex;
-      justify-content: center;
-      align-items: flex-start;
+      flex-direction: column;
+      align-items: center;
       min-height: 100vh;
-      padding: 40px 20px;
     }
 
-    /* Grid layout holding the responsive cards */
+    h1 {
+      margin-bottom: 20px;
+      font-size: 1.8rem;
+      color: #1a202c;
+    }
+
+    /* 1. THE SENTENCE BUILDER DISPLAY BAR */
+    .sentence-container {
+      width: 100%;
+      max-width: 1100px;
+      background: #ffffff;
+      border: 2px dashed #cbd5e1;
+      border-radius: 16px;
+      padding: 20px;
+      min-height: 100px;
+      margin-bottom: 30px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      overflow-x: auto;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    .sentence-word {
+      background: #eff6ff;
+      border: 2px solid #3b82f6;
+      border-radius: 12px;
+      padding: 8px 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: popIn 0.2s ease;
+    }
+
+    .clear-btn {
+      margin-left: auto;
+      background: #ef4444;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* 2. THE CORE VOCABULARY GRID */
     .aac-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 24px;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 20px;
       width: 100%;
-      max-width: 1000px;
-      margin: 0 auto;
+      max-width: 1100px;
+      margin-bottom: 40px;
     }
 
-    /* Exact Card Style matching image_51a2b9.png */
+    /* IPAD CARD DESIGN */
     .aac-tile {
       background-color: #ffffff;
-      border: 1px solid #e5e9f0;
+      border: 2px solid #e2e8f0;
       border-radius: 16px;
-      padding: 32px 24px 20px 24px; /* Added spacing to cushion the layout */
+      padding: 16px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: space-between;
       cursor: pointer;
-      aspect-ratio: 1 / 1; /* Guarantees tiles stay perfectly square on iPad */
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.02), 0 8px 16px -6px rgba(0, 0, 0, 0.02);
-      transition: transform 0.1s ease, box-shadow 0.1s ease;
-      
-      /* Optimizes touch interactions for iOS Safari */
+      aspect-ratio: 1 / 1; /* Keeps tiles perfectly square on tablet grids */
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+      transition: transform 0.1s ease, border-color 0.1s ease;
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* Tactile response when tapped on iPad */
     .aac-tile:active {
-      transform: scale(0.97);
-      background-color: #fcfdfe;
+      transform: scale(0.96);
+      border-color: #3b82f6;
     }
 
-    /* FIX 1: Fluid Icon Container (Maintains high-vis dimensions across different formats) */
+    /* REUSEABLE ICON WRAPPER: Automatically resizes ANY picture option seamlessly */
     .tile-icon-container {
-      width: 70%;  /* Controls how large the icon sits inside the square */
-      height: 70%;
+      width: 65%;
+      height: 65%;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: auto; /* Pushes text cleanly to the absolute bottom margin */
+      margin-bottom: auto;
     }
 
-    /* Forces SVGs, Local PNGs, or URL Images to scale identically inside the wrapper */
     .tile-icon-container img,
     .tile-icon-container svg {
       width: 100%;
       height: 100%;
-      object-fit: contain; /* Prevents stretching or clipping distortion */
+      object-fit: contain; /* Prevents user-uploaded images from stretching or squeezing */
     }
 
-    /* Exact Text Label Typography from your design */
     .aac-label {
-      font-size: 1.1rem;
-      font-weight: 500;
-      color: #2d3748;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #334155;
       text-align: center;
-      margin-top: 16px;
+      margin-top: 8px;
+    }
+
+    /* 3. MANAGEMENT PANEL: ADD CUSTOM WORDS & IMAGES */
+    .management-panel {
+      width: 100%;
+      max-width: 1100px;
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      border: 1px solid #e2e8f0;
+    }
+
+    .management-panel h3 {
+      margin-bottom: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: flex-end;
+    }
+
+    .input-field {
+      flex: 1;
+      min-width: 200px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .input-field label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #64748b;
+    }
+
+    .input-field input, .input-field select {
+      padding: 10px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    .input-field input:focus {
+      border-color: #3b82f6;
+    }
+
+    .add-tile-btn {
+      background: #10b981;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
     }
   </style>
 </head>
 <body>
 
-  <div class="aac-grid">
-    
-    <!-- TILE 1: ACTION -->
-    <div class="aac-tile" data-audio="audio/action.mp3">
-      <div class="tile-icon-container">
-        <!-- ICON OPTION A: Inline SVG matching your blue action symbol -->
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="#2563eb">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 21l8.982-11.795H14.18l.818-5.205L6 15.904h3.813Z" />
-        </svg>
-        
-        <!-- ICON OPTION B (Local File Placeholder): 
-        <img src="assets/action.png" alt="Action"> 
-        -->
-        
-        <!-- ICON OPTION C (Web URL Placeholder): 
-        <img src="https://example.com/action-icon.png" alt="Action"> 
-        -->
-      </div>
-      <div class="aac-label">Action</div>
-    </div>
+  <h1>GridTalk AAC</h1>
 
-    <!-- TILE 2: PERSON -->
-    <div class="aac-tile" data-audio="audio/person.mp3">
-      <div class="tile-icon-container">
-        <!-- ICON OPTION A: Inline SVG matching your green person symbol -->
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="#10b981">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-        </svg>
-      </div>
-      <div class="aac-label">Person</div>
-    </div>
+  <!-- Sentence Assembly Bar -->
+  <div class="sentence-container" id="sentence-bar">
+    <div style="color: #94a3b8;" id="placeholder-text">Tap tiles below to build a sentence...</div>
+    <!-- Words will inject dynamically here -->
+    <button class="clear-btn" id="clear-sentence" style="display: none;">Clear</button>
+  </div>
 
+  <!-- Main Grid Board -->
+  <div class="aac-grid" id="main-board">
+    <!-- Grid items loaded dynamically by JavaScript -->
+  </div>
+
+  <!-- Creator Form Layout to Add Your Personal Pictures & Words -->
+  <div class="management-panel">
+    <h3>Add Custom Vocabulary Card</h3>
+    <div class="form-group">
+      <div class="input-field">
+        <label for="word-label">Word/Label</label>
+        <input type="text" id="word-label" placeholder="e.g., More">
+      </div>
+      
+      <div class="input-field">
+        <label for="icon-type">Icon Type</label>
+        <select id="icon-type" onchange="toggleIconInput()">
+          <option value="url">Image Web URL / Local Path</option>
+          <option value="svg">Inline SVG Code</option>
+        </select>
+      </div>
+
+      <div class="input-field" id="icon-value-container">
+        <label id="icon-label-text" for="icon-value">Image Source Link</label>
+        <input type="text" id="icon-value" placeholder="https://example.com/picture.png">
+      </div>
+
+      <div class="input-field">
+        <label for="audio-source">Speech Audio URL (Optional)</label>
+        <input type="text" id="audio-source" placeholder="Leave blank for auto text-to-speech">
+      </div>
+
+      <button class="add-tile-btn" onclick="addNewVocabularyCard()">Add To Grid</button>
+    </div>
   </div>
 
   <script>
-    // FIX 2: Global single-instance Audio pool to handle iOS Safari restrictions
+    // CORE DICTIONARY DATASET (Your database layout)
+    let vocabularyData = [
+      {
+        label: "I Want",
+        iconType: "svg",
+        iconValue: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#2563eb"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" /></svg>`,
+        audio: "" 
+      },
+      {
+        label: "Help",
+        iconType: "svg",
+        iconValue: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#10b981"><path stroke-linecap="round" stroke-linejoin="round" d="M10.05 4.575a1.5 1.5 0 0 0-1.93 1.93l1.757 5.273-5.273-1.757a1.5 1.5 0 0 0-1.93 1.93l5.273 1.757-1.757 5.273a1.5 1.5 0 0 0 1.93 1.93l5.273-1.757 1.757 5.273a1.5 1.5 0 0 0 1.93-1.93l-1.757-5.273 5.273 1.757a1.5 1.5 0 0 0 1.93-1.93l-5.273-1.757 1.757-5.273a1.5 1.5 0 0 0-1.93-1.93l-5.273 1.757 1.757-5.273Z" /></svg>`,
+        audio: ""
+      },
+      {
+        label: "Eat",
+        iconType: "url",
+        iconValue: "https://cdn-icons-png.flaticon.com/512/3081/3081921.png", // Web picture example
+        audio: ""
+      }
+    ];
+
+    let sentenceArray = [];
+    
+    // IPAD AUDIO RESTRICTION RESOLUTION: Maintain a cached audio pool 
     let iPadAudioPool = null;
 
-    function playAACSound(audioUrl) {
-      if (!audioUrl) return;
+    // Render loop processing the whole grid array dynamically
+    function renderAacBoard() {
+      const board = document.getElementById('main-board');
+      
+      board.innerHTML = vocabularyData.map((tile, index) => {
+        // Evaluate icon injection method straight out of the JSON properties
+        const interiorIcon = tile.iconType === 'svg' 
+          ? tile.iconValue 
+          : `<img src="${tile.iconValue}" alt="${tile.label}">`;
 
-      // Lazy-instantiate the Audio element strictly inside the user execution thread
-      if (!iPadAudioPool) {
-        iPadAudioPool = new Audio();
-      }
+        return `
+          <div class="aac-tile" onclick="handleTileActivation(${index})">
+            <div class="tile-icon-container">
+              ${interiorIcon}
+            </div>
+            <div class="aac-label">${tile.label}</div>
+          </div>
+        `;
+      }).join('');
+    }
 
-      try {
-        // Synchronously bind the file target before the browser security window expires
-        iPadAudioPool.src = audioUrl;
-        
-        // Clear old browser audio memory traces
-        iPadAudioPool.load(); 
-        
-        const playPromise = iPadAudioPool.play();
-        
-        if (playPromise !== undefined) {
-          playPromise.catch(error => {
-            console.error("Audio block encountered on iPad:", error);
-            // Reminder: Make sure the iPad hardware mute switch on the side/Control Center isn't enabled!
-          });
-        }
-      } catch (e) {
-        console.error("Audio engine failed to load resource:", e);
+    // Handles speaking and moving choices into the sentence track
+    function handleTileActivation(index) {
+      const selectedItem = vocabularyData[index];
+      
+      // Update sentence tracker logic
+      sentenceArray.push(selectedItem);
+      updateSentenceBarDisplay();
+
+      // EXECUTE CONTEXT SPEECH SYNCED ON TOUCH TIME
+      if (selectedItem.audio) {
+        // If an explicit MP3 route exists, route it via single audio node
+        if (!iPadAudioPool) iPadAudioPool = new Audio();
+        iPadAudioPool.src = selectedItem.audio;
+        iPadAudioPool.load();
+        iPadAudioPool.play().catch(e => console.log("Audio node block:", e));
+      } else {
+        // Default Fallback: iOS Text To Speech Engine
+        const speechUtterance = new SpeechSynthesisUtterance(selectedItem.label);
+        speechUtterance.rate = 0.9;
+        window.speechSynthesis.speak(speechUtterance);
       }
     }
 
-    // Modern event delegation loop targeting touch coordinates cleanly
-    document.addEventListener('DOMContentLoaded', () => {
-      const mainGrid = document.querySelector('.aac-grid');
+    // Sentence Box updates
+    function updateSentenceBarDisplay() {
+      const bar = document.getElementById('sentence-bar');
+      const placeholder = document.getElementById('placeholder-text');
+      const clearBtn = document.getElementById('clear-sentence');
+      
+      // Clear out previous render trace elements safely
+      const existingWords = bar.querySelectorAll('.sentence-word');
+      existingWords.forEach(el => el.remove());
 
-      mainGrid.addEventListener('click', (event) => {
-        const clickedCard = event.target.closest('.aac-tile');
+      if (sentenceArray.length === 0) {
+        placeholder.style.display = "block";
+        clearBtn.style.display = "none";
+        return;
+      }
+
+      placeholder.style.display = "none";
+      clearBtn.style.display = "block";
+
+      // Append terms sequentially up onto the construction workspace
+      sentenceArray.forEach(item => {
+        const wordBadge = document.createElement('div');
+        wordBadge.className = 'sentence-word';
         
-        if (clickedCard) {
-          const soundFilePath = clickedCard.getAttribute('data-audio');
-          playAACSound(soundFilePath);
-        }
+        const miniIcon = item.iconType === 'svg' ? item.iconValue : `<img src="${item.iconValue}" style="width:20px;height:20px;object-fit:contain;">`;
+        wordBadge.innerHTML = `${miniIcon} <span>${item.label}</span>`;
+        
+        bar.insertBefore(wordBadge, clearBtn);
       });
+    }
+
+    // Clear Sentence Action
+    document.getElementById('clear-sentence').addEventListener('click', () => {
+      sentenceArray = [];
+      updateSentenceBarDisplay();
+    });
+
+    // ENGINE FOR ADDING PICTURES AND CUSTOM WORDS ON THE FLY
+    function addNewVocabularyCard() {
+      const labelInput = document.getElementById('word-label').value.trim();
+      const typeInput = document.getElementById('icon-type').value;
+      const valueInput = document.getElementById('icon-value').value.trim();
+      const audioInput = document.getElementById('audio-source').value.trim();
+
+      if (!labelInput || !valueInput) {
+        alert("Please provide both a Word Label and an Image source link!");
+        return;
+      }
+
+      // Add custom array node directly to runtime memory layout 
+      vocabularyData.push({
+        label: labelInput,
+        iconType: typeInput,
+        iconValue: valueInput,
+        audio: audioInput
+      });
+
+      // Refresh layout render trace
+      renderAacBoard();
+
+      // Reset form variables
+      document.getElementById('word-label').value = '';
+      document.getElementById('icon-value').value = '';
+      document.getElementById('audio-source').value = '';
+    }
+
+    function toggleIconInput() {
+      const type = document.getElementById('icon-type').value;
+      const label = document.getElementById('icon-label-text');
+      const input = document.getElementById('icon-value');
+
+      if (type === 'svg') {
+        label.innerText = "Paste SVG Code Code String";
+        input.placeholder = "<svg>...</svg>";
+      } else {
+        label.innerText = "Image Source Link";
+        input.placeholder = "https://example.com/picture.png";
+      }
+    }
+
+    // Boot execution loop on startup
+    document.addEventListener('DOMContentLoaded', () => {
+      renderAacBoard();
     });
   </script>
 </body>
