@@ -1,387 +1,156 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="GridTalk">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Sentence Builder AAC</title>
+  
+  <style>
+    /* Reset and Core Layout */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
     
-    <link rel="manifest" href="manifest.json">
-    <title>AAC Sentence Builder</title>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f5f7fb;
+      padding: 20px;
+    }
 
-    <!-- Dexie.js for easy IndexedDB management -->
-    <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+    /* Fluid Grid Container */
+    .aac-grid {
+      display: grid;
+      /* Automatically fits columns based on screen width, min size 140px */
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 16px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
 
-    <style>
-        * { box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f4f4f9;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overscroll-behavior-y: none; 
-            user-select: none;
-            -webkit-user-select: none;
-        }
+    /* Accessible Touch Target Tiles */
+    .aac-tile {
+      background-color: #ffffff;
+      border: 3px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      /* Keeps tiles perfectly square regardless of column width */
+      aspect-ratio: 1 / 1; 
+      transition: transform 0.1s ease, border-color 0.2s ease;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      
+      /* Webkit optimizes touch delays on iPad */
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-        /* Settings Bar */
-        .settings-bar {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 10px;
-        }
-        .settings-btn {
-            background: none;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            color: #8e8e93;
-            padding: 5px;
-        }
+    /* Tactile response feedback on tap */
+    .aac-tile:active {
+      transform: scale(0.96);
+      border-color: #3b82f6;
+      background-color: #eff6ff;
+    }
 
-        #top-container {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
+    /* FLUID ICON FIX: Icons scale smoothly based on tile size */
+    .aac-icon-wrapper {
+      width: 60%;
+      height: 60%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-        #output-bar {
-            background: white;
-            border-radius: 12px;
-            padding: 15px;
-            font-size: 26px;
-            font-weight: bold;
-            min-height: 75px;
-            flex-grow: 1;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            overflow-x: auto;
-            white-space: nowrap;
-            border: 2px solid #e0e0e0;
-        }
+    .aac-icon-wrapper img,
+    .aac-icon-wrapper svg {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
 
-        .control-panel { display: flex; gap: 10px; }
-        .control-btn {
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: bold;
-            color: white;
-            cursor: pointer;
-            padding: 0 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
-            min-width: 90px;
-        }
-        .control-btn span { font-size: 24px; margin-bottom: 4px; }
-        .btn-speak { background-color: #34c759; } 
-        .btn-clear { background-color: #ff3b30; } 
-        .btn-back { background-color: #ff9500; }  
-
-        .control-btn:active, .btn:active { transform: scale(0.95); }
-
-        /* Grid */
-        #grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-            gap: 15px;
-            flex-grow: 1;
-            align-content: start;
-        }
-        .btn {
-            background-color: #007aff;
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 15px 5px;
-            position: relative;
-        }
-        .btn span { font-size: 42px; margin-bottom: 8px; }
-        .word-img {
-            width: 55px;
-            height: 55px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            background: white;
-        }
-
-        /* Edit Mode Styles */
-        .edit-mode .btn {
-            background-color: #e5e5ea;
-            color: #000;
-            border: 2px dashed #ff9500;
-        }
-        .delete-badge {
-            display: none;
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background: #ff3b30;
-            color: white;
-            border-radius: 50%;
-            width: 28px;
-            height: 28px;
-            text-align: center;
-            line-height: 28px;
-            font-size: 14px;
-            font-weight: bold;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            z-index: 10;
-        }
-        .edit-mode .delete-badge { display: block; }
-        
-        #add-word-btn {
-            background-color: #f4f4f9;
-            color: #34c759;
-            border: 2px dashed #34c759;
-            display: none; 
-        }
-        .edit-mode #add-word-btn { display: flex; }
-
-        /* Modal */
-        #modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.6);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        #modal-content {
-            background: white;
-            padding: 25px;
-            border-radius: 16px;
-            width: 90%;
-            max-width: 350px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        #modal-content input {
-            padding: 12px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-        }
-        .modal-btns {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .modal-btn {
-            border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px;
-        }
-        .btn-save { background-color: #34c759; color: white; }
-        .btn-cancel { background-color: #e5e5ea; color: black; }
-    </style>
+    /* Legible Label Typography */
+    .aac-label {
+      margin-top: 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #1e293b;
+      text-align: center;
+      word-break: break-word;
+    }
+  </style>
 </head>
 <body>
 
-    <div class="settings-bar">
-        <button class="settings-btn" id="toggle-edit">⚙️ Edit Mode</button>
+  <div class="aac-grid">
+    
+    <div class="aac-tile" data-sound="https://actions.google.com/sounds/v1/cartoon/slide_whistle_to_drum_hit.ogg">
+      <div class="aac-icon-wrapper">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#3b82f6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.05 4.575a1.5 1.5 0 0 0-1.93 1.93l1.757 5.273-5.273-1.757a1.5 1.5 0 0 0-1.93 1.93l5.273 1.757-1.757 5.273a1.5 1.5 0 0 0 1.93 1.93l5.273-1.757 1.757 5.273a1.5 1.5 0 0 0 1.93-1.93l-1.757-5.273 5.273 1.757a1.5 1.5 0 0 0 1.93-1.93l-5.273-1.757 1.757-5.273a1.5 1.5 0 0 0-1.93-1.93l-5.273 1.757 1.757-5.273Z" />
+        </svg>
+      </div>
+      <div class="aac-label">Action</div>
     </div>
 
-    <div id="top-container">
-        <div id="output-bar">Tap words to build a sentence...</div>
-        <div class="control-panel">
-            <button class="control-btn btn-speak" id="action-speak"><span>🔊</span>Speak</button>
-            <button class="control-btn btn-back" id="action-back"><span>⌫</span>Back</button>
-            <button class="control-btn btn-clear" id="action-clear"><span>🗑️</span>Clear</button>
-        </div>
+    <div class="aac-tile" data-sound="https://actions.google.com/sounds/v1/actions/snare_roll.ogg">
+      <div class="aac-icon-wrapper">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#10b981">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+        </svg>
+      </div>
+      <div class="aac-label">Person</div>
     </div>
 
-    <div id="grid"></div>
+  </div>
 
-    <!-- Modal for Adding Custom Photo Words -->
-    <div id="modal-overlay">
-        <div id="modal-content">
-            <h3 style="margin-top:0;">Add Custom Word</h3>
-            <label>Word / Phrase:</label>
-            <input type="text" id="new-word-text" placeholder="e.g. Goldfish">
-            <label>Photo:</label>
-            <input type="file" id="new-word-file" accept="image/*">
-            <div class="modal-btns">
-                <button class="modal-btn btn-cancel" id="btn-cancel-modal">Cancel</button>
-                <button class="modal-btn btn-save" id="btn-save-modal">Save</button>
-            </div>
-        </div>
-    </div>
+  <script>
+    // IPAD AUDIO FIX: Maintain a single cached Audio Context or Audio Instance globally
+    let audioPlaybackEngine = null;
 
-    <script>
-        let currentSentence = [];
-        let isEditMode = false;
-        const grid = document.getElementById('grid');
-        const outputBar = document.getElementById('output-bar');
+    function playAACSound(soundUrl) {
+      if (!soundUrl) return;
 
-        // --- Database Setup using Dexie ---
-        const db = new Dexie('GridTalkDB');
-        db.version(1).stores({
-            vocabulary: '++id, text, iconString, iconBlob' 
+      // Lazy initialize the audio player object on the very first tap gesture
+      if (!audioPlaybackEngine) {
+        audioPlaybackEngine = new Audio();
+      }
+
+      // Explicitly change the source context synchronously
+      audioPlaybackEngine.src = soundUrl;
+      
+      // iOS requires the .load() configuration to clear out old state strings
+      audioPlaybackEngine.load();
+
+      // Execute execution inside a synchronous promise handle
+      const playPromise = audioPlaybackEngine.play();
+
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          console.error("Audio playback muted or prevented by iOS safety context:", error);
+          alert("Please verify your iPad is not toggled to Hardware Silent/Mute mode via Control Center.");
         });
+      }
+    }
 
-        const defaultVocabulary = [
-            { text: "I want", iconString: "🤲" },
-            { text: "More", iconString: "➕" },
-            { text: "Eat", iconString: "🍎" },
-            { text: "Drink", iconString: "🧃" },
-            { text: "Help", iconString: "🆘" },
-            { text: "Please", iconString: "🙏" },
-            { text: "Yes", iconString: "✅" },
-            { text: "No", iconString: "❌" }
-        ];
+    // Attach interaction events cleanly using event delegation
+    document.addEventListener('DOMContentLoaded', () => {
+      const gridContainer = document.querySelector('.aac-grid');
 
-        // --- Core Functions ---
-        async function loadGrid() {
-            let count = await db.vocabulary.count();
-            // If database is completely empty, inject defaults
-            if (count === 0) {
-                await db.vocabulary.bulkAdd(defaultVocabulary);
-            }
-            const items = await db.vocabulary.toArray();
-            renderGrid(items);
+      // 'pointerdown' or 'click' handles events immediately along the main user action timeline
+      gridContainer.addEventListener('click', (event) => {
+        const targetedTile = event.target.closest('.aac-tile');
+        
+        if (targetedTile) {
+          const audioUrl = targetedTile.getAttribute('data-sound');
+          playAACSound(audioUrl);
         }
-
-        function renderGrid(items) {
-            grid.innerHTML = '';
-            
-            items.forEach(item => {
-                const btn = document.createElement('button');
-                btn.className = 'btn';
-                
-                let iconHtml = '';
-                // Render image if uploaded, otherwise fallback to emoji
-                if (item.iconBlob) {
-                    const url = URL.createObjectURL(item.iconBlob);
-                    iconHtml = `<img src="${url}" class="word-img" alt="${item.text}">`;
-                } else {
-                    iconHtml = `<span>${item.iconString}</span>`;
-                }
-                
-                btn.innerHTML = `
-                    <div class="delete-badge">✖</div>
-                    ${iconHtml}
-                    ${item.text}
-                `;
-                
-                // Handle Delete (Only works in Edit Mode)
-                const deleteBadge = btn.querySelector('.delete-badge');
-                deleteBadge.addEventListener('pointerdown', async (e) => {
-                    e.stopPropagation(); // Stop button click
-                    if(confirm(`Delete "${item.text}"?`)) {
-                        await db.vocabulary.delete(item.id);
-                        loadGrid();
-                    }
-                });
-
-                // Handle Normal Tap
-                btn.addEventListener('pointerdown', (e) => {
-                    e.preventDefault();
-                    if (isEditMode) return; // Disable speaking/adding while editing
-                    
-                    currentSentence.push(item.text);
-                    updateDisplay();
-                    speak(item.text);
-                });
-                
-                grid.appendChild(btn);
-            });
-
-            // "Add Word" Button (Only visible via CSS in edit mode)
-            const addBtn = document.createElement('button');
-            addBtn.className = 'btn';
-            addBtn.id = 'add-word-btn';
-            addBtn.innerHTML = `<span>➕</span>Add Photo`;
-            addBtn.addEventListener('pointerdown', (e) => {
-                e.preventDefault();
-                document.getElementById('modal-overlay').style.display = 'flex';
-            });
-            grid.appendChild(addBtn);
-        }
-
-        function speak(text) {
-            if (!text) return;
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            window.speechSynthesis.speak(utterance);
-        }
-
-        function updateDisplay() {
-            if (currentSentence.length === 0) {
-                outputBar.textContent = "Tap words to build a sentence...";
-                outputBar.style.color = "#8e8e93";
-            } else {
-                outputBar.textContent = currentSentence.join(" ");
-                outputBar.style.color = "#000000";
-            }
-            outputBar.scrollLeft = outputBar.scrollWidth;
-        }
-
-        // --- Event Listeners ---
-        document.getElementById('action-speak').addEventListener('pointerdown', e => { e.preventDefault(); speak(currentSentence.join(" ")); });
-        document.getElementById('action-back').addEventListener('pointerdown', e => { e.preventDefault(); currentSentence.pop(); updateDisplay(); });
-        document.getElementById('action-clear').addEventListener('pointerdown', e => { e.preventDefault(); currentSentence = []; updateDisplay(); });
-
-        // Toggle Edit Mode
-        document.getElementById('toggle-edit').addEventListener('click', () => {
-            isEditMode = !isEditMode;
-            document.body.classList.toggle('edit-mode', isEditMode);
-            document.getElementById('toggle-edit').style.color = isEditMode ? "#ff9500" : "#8e8e93";
-        });
-
-        // Modal Logic
-        document.getElementById('btn-cancel-modal').addEventListener('click', () => {
-            document.getElementById('modal-overlay').style.display = 'none';
-            document.getElementById('new-word-text').value = '';
-            document.getElementById('new-word-file').value = '';
-        });
-
-        document.getElementById('btn-save-modal').addEventListener('click', async () => {
-            const textInput = document.getElementById('new-word-text').value.trim();
-            const fileInput = document.getElementById('new-word-file').files[0];
-
-            if (!textInput || !fileInput) {
-                alert("Please provide both a word and a photo.");
-                return;
-            }
-
-            // Save raw file directly into IndexedDB
-            await db.vocabulary.add({
-                text: textInput,
-                iconBlob: fileInput
-            });
-
-            document.getElementById('btn-cancel-modal').click(); // close and clear modal
-            loadGrid(); // Refresh screen
-        });
-
-        // Init App
-        loadGrid();
-
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js');
-            });
-        }
-    </script>
+      });
+    });
+  </script>
 </body>
 </html>
